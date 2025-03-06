@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Notas Musicales</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #282c36;
+            color: white;
+        }
+        .container {
+            max-width: 90%;
+            width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: #3a3f4b;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        }
+        .container:hover {
+            transform: scale(1.02);
+        }
+        .question {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        .options button, #startButton {
+            font-size: 18px;
+            padding: 12px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff9800;
+            color: white;
+            transition: background 0.3s, transform 0.2s;
+            width: 100%;
+            max-width: 120px;
+        }
+        .options button:hover, #startButton:hover {
+            background-color: #e68900;
+            transform: scale(1.1);
+        }
+        .options button:active, #startButton:active {
+            transform: scale(0.9);
+        }
+        #result {
+            font-size: 20px;
+            margin-top: 15px;
+            transition: opacity 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Aprende las Notas Musicales</h1>
+        <button id="startButton">Iniciar Juego</button>
+        <div class="question" id="question" style="display: none;"></div>
+        <div class="options" id="options"></div>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        const notas = [
+            { nombre: "Do", letra: "C", sonido: new Audio("./sonidos/do.mp3") },
+            { nombre: "Re", letra: "D", sonido: new Audio("./sonidos/re.mp3") },
+            { nombre: "Mi", letra: "E", sonido: new Audio("./sonidos/mi.mp3") },
+            { nombre: "Fa", letra: "F", sonido: new Audio("./sonidos/fa.mp3") },
+            { nombre: "Sol", letra: "G", sonido: new Audio("./sonidos/sol.mp3") },
+            { nombre: "La", letra: "A", sonido: new Audio("./sonidos/la.mp3") },
+            { nombre: "Si", letra: "B", sonido: new Audio("./sonidos/si.mp3") }
+        ];
+
+        let notaActual = {};
+
+        function nuevaPregunta() {
+            notaActual = notas[Math.floor(Math.random() * notas.length)];
+            document.getElementById("question").textContent = `Escucha la nota...`;
+            document.getElementById("question").style.display = "block";
+            setTimeout(() => {
+                reproducirSonido(notaActual.sonido, () => {
+                    document.getElementById("question").textContent = `¿Cuál es la letra de la nota "${notaActual.nombre}"?`;
+                    mostrarOpciones();
+                    document.getElementById("result").style.opacity = "0";
+                });
+            }, 1000);
+        }
+
+        function mostrarOpciones() {
+            const opciones = document.getElementById("options");
+            opciones.innerHTML = "";
+            let respuestas = [...notas.map(n => n.letra)].sort(() => Math.random() - 0.5);
+            respuestas.forEach(letra => {
+                const btn = document.createElement("button");
+                btn.textContent = letra;
+                btn.onclick = () => verificarRespuesta(letra);
+                opciones.appendChild(btn);
+            });
+        }
+
+        function verificarRespuesta(letra) {
+            const resultado = document.getElementById("result");
+            if (letra === notaActual.letra) {
+                resultado.textContent = "¡Correcto!";
+                resultado.style.color = "#4CAF50";
+            } else {
+                resultado.textContent = "Incorrecto, intenta de nuevo.";
+                resultado.style.color = "#FF3D00";
+            }
+            resultado.style.opacity = "1";
+            setTimeout(nuevaPregunta, 1500);
+        }
+
+        function reproducirSonido(audio, callback) {
+            audio.currentTime = 0;
+            audio.play().then(() => {
+                audio.onended = callback;
+            }).catch(error => {
+                console.error("Error al reproducir sonido:", error);
+            });
+        }
+
+        document.getElementById("startButton").addEventListener("click", function() {
+            this.style.display = "none";
+            nuevaPregunta();
+        });
+    </script>
+</body>
+</html>
